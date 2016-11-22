@@ -1,0 +1,27 @@
+****************** Laboration 2 - Preparatory questions *********************
+
+1. What is the role of the go-ahead message?
+
+The role of the go-ahead message is a form of confirmation from the mission control to the robot, that
+the message was sent in the approperiate time-slot and that it was recieved. If no go-ahead message is
+recieved after a transmission, the robot will stop until a go-ahead message is recieved.
+
+2. What are the different message types?
+
+The message types are as follows:
+*Victim reports - are sent when a victim is found (critical)
+
+*Location messages - contains information about the robots position. If positional information is not
+	  	     conveyed to mission control no go-ahead message will be recieved.
+ 
+*Pheromone maps - Indicates which areas have been searched by all robots. Old pheromone maps are reduntant.
+	   
+*Stream data - emulates video transmission, should be transmitted if there is room in the message (should be considered as non-critical).
+
+3. In which files will the solutions for lab 2 go?
+
+Solutions will go in tasks/task_communicate.c. There might be need for some changes to scheduler.c, depending on lab 1 implementation (for task_communicate to be run within approperiate time-slot).
+
+4. How can you make sure that the robot only sends messages within its allocated time slot?
+
+All robots will be communicating with the same mission control. Therefore robot clock has to be synchronized with the mission control clock so that they have the same notion of _current_ time. The scheduler needs to have a be implemented so that the major cycle equals one full time cycle, ie so that communication occurs in the same timeslot every major cycle. 
