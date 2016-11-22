@@ -1,0 +1,6 @@
+Simulated data rate -	153600 bits per seconds
+	       	    	19200 bytes per seconds
+			19.2 kB per seconds
+			18.75 KiB per seconds
+
+./src/config.h:147:#define s_CONFIG_DEFAULT_UDP_PACKET_SIZE	512
