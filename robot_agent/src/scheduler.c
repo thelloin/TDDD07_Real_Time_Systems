@@ -19,6 +19,7 @@
 #include "task.h"
 #include "timelib.h"
 #include <time.h>
+#include <math.h>
 /* -- Defines -- */
 
 /* -- Functions -- */
@@ -70,10 +71,16 @@ void scheduler_wait_for_timer(scheduler_t *ces)
 
 	// Calculate time till end of the minor cycle
 	sleep_time = (ces->minor * 1000) - (int)(timelib_timer_get(ces->tv_cycle) * 1000);
+//	printf(timelib_timer_get);
+	//printf("sleep time %d \n", sleep_time);
+	/*printf("ces minor %d \n", ces->minor);
+	printf("ces minor*1000 %d \n", ces->minor * 1000);
+	printf("tv_cycle %d \n", (int)timelib_timer_get(ces->tv_cycle));
+	printf("tv_cycle*1000 %d \n", (int)timelib_timer_get(ces->tv_cycle) *1000);*/
 
 	// Add minor cycle period to timer
 	timelib_timer_add_ms(&ces->tv_cycle, ces->minor);
-
+	//printf("tv_cycle after timelib %d \n", (int)timelib_timer_get(ces->tv_cycle));
 	// Check for overrun and execute sleep only if there is no
 	if(sleep_time > 0)
 	{
@@ -161,6 +168,57 @@ void minor_cycle_8(scheduler_t *ces) {
 
 }
 
+void scheduler_wait_for_timeslot(scheduler_t *ces, int group_number)
+{
+  /*int sleep_time; // Sleep time in microseconds
+
+	// Calculate time till end of the minor cycle
+	sleep_time = (time_to_wait * 1000) - (int)(timelib_timer_get(ces->tv_cycle) * 1000);
+
+	// Add minor cycle period to timer
+	timelib_timer_add_ms(&ces->tv_cycle, ces->minor);
+
+	// Check for overrun and execute sleep only if there is no
+	if(sleep_time > 0)
+	{
+		// Go to sleep (multipy with 1000 to get miliseconds)
+		usleep(sleep_time);
+		}*/
+  int time_left_this_second;
+  int sleep_time;
+  int group_time_to_wait = (group_number - 1) * 125000; 
+  double integral;
+  double unix_timestamp = timelib_unix_timestamp() / 1000;
+  modf(unix_timestamp, &integral);
+
+  time_left_this_second = (100000 - (int)((unix_timestamp - integral) * 100000)) * 10;
+  
+  if(group_number == 0) {
+    sleep_time = time_left_this_second;
+  }
+  else if(time_left_this_second > group_time_to_wait) {
+    sleep_time = group_time_to_wait - time_left_this_second;
+  }
+  else {
+    sleep_time = time_left_this_second + group_time_to_wait;
+  }
+
+
+    // Go to sleep (multipy with 1000 to get miliseconds)
+   usleep(sleep_time - 200);
+ 
+
+  
+  
+  
+   //printf("INTEGRAL %d \n", integral);
+  
+
+   //printf("time_left_this_second %d \n", time_left_this_second);
+   //printf("UNIX TIMESTAMP: %f \n", unix_timestamp);
+  
+}
+
 
 /**
  * Run scheduler
@@ -183,18 +241,20 @@ void scheduler_run(scheduler_t *ces)
 
 
   struct timeval timer;
-
+  int groupNumber = 5;
 
   int i = 1;
   double exec_times[7];
   timelib_timer_set(&timer);
   ces->minor = 125;
+  scheduler_wait_for_timeslot(ces, groupNumber);
+  printf("Execution starts: %f", timelib_unix_timestamp() / 1000);
   scheduler_start(ces);
   //scheduler_exec_task(ces, 2);
   //scheduler_exec_task(ces, 3);
   while(1) {
 
-
+    
     minor_cycle_1(ces);
     scheduler_wait_for_timer(ces);
     
@@ -219,7 +279,7 @@ void scheduler_run(scheduler_t *ces)
     minor_cycle_8(ces);
     scheduler_wait_for_timer(ces);
 
-    printf("%f \n", timelib_timer_reset(&timer));
+    // printf("%f \n", timelib_timer_reset(&timer));
   }
   /* --- Local variables (define variables here) --- */
   
