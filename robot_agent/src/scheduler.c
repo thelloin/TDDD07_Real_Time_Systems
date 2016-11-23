@@ -130,46 +130,35 @@ void scheduler_exec_task(scheduler_t *ces, int task_id)
 
 
 
-
 void minor_cycle_1(scheduler_t *ces) {
-  scheduler_exec_task(ces, 1);
-  scheduler_exec_task(ces, 2);
-  scheduler_exec_task(ces, 3);
+  scheduler_exec_task(ces, 6);
   scheduler_exec_task(ces, 7);
-  scheduler_exec_task(ces, 4);
+
   
 }
 
 void minor_cycle_2(scheduler_t *ces) {
   scheduler_exec_task(ces, 1);
+  scheduler_exec_task(ces, 2);
+  scheduler_exec_task(ces, 3);
+  scheduler_exec_task(ces, 7);
+  scheduler_exec_task(ces, 4);
+  scheduler_exec_task(ces, 5);  
+}
+
+void minor_cycle_34567(scheduler_t *ces) {
   scheduler_exec_task(ces, 7);
   scheduler_exec_task(ces, 4);
   scheduler_exec_task(ces, 5);
-  
 }
 
-
-
-void minor_cycle_3(scheduler_t *ces) {
-  scheduler_exec_task(ces, 7);
-  scheduler_exec_task(ces, 4);
-  
-}
-
-void minor_cycle_4(scheduler_t *ces) {
+void minor_cycle_8(scheduler_t *ces) {
+  scheduler_exec_task(ces, 2);
+  scheduler_exec_task(ces, 3);
   scheduler_exec_task(ces, 7);
   scheduler_exec_task(ces, 4);
   scheduler_exec_task(ces, 5);
-  
-}
 
-
-
-void minor_cycle_5(scheduler_t *ces) {
-  scheduler_exec_task(ces, 7);
-  scheduler_exec_task(ces, 4);
-  scheduler_exec_task(ces, 5);
-  scheduler_exec_task(ces, 6);
 }
 
 
@@ -199,7 +188,7 @@ void scheduler_run(scheduler_t *ces)
   int i = 1;
   double exec_times[7];
   timelib_timer_set(&timer);
-  ces->minor = 112;
+  ces->minor = 125;
   scheduler_start(ces);
   //scheduler_exec_task(ces, 2);
   //scheduler_exec_task(ces, 3);
@@ -207,26 +196,29 @@ void scheduler_run(scheduler_t *ces)
 
 
     minor_cycle_1(ces);
-   
     scheduler_wait_for_timer(ces);
+    
     minor_cycle_2(ces);
     scheduler_wait_for_timer(ces);
-    minor_cycle_3(ces);
-    scheduler_wait_for_timer(ces);
-    minor_cycle_4(ces);
-    scheduler_wait_for_timer(ces);
-    minor_cycle_5(ces);
-    scheduler_wait_for_timer(ces);
-    //scheduler_exec_task(ces, 7);
-    //exec_times[i-1] = timelib_timer_reset(&timer);
-    //i++;
     
-    /*if(i > 7) {
-      if(exec_times[6] > 25.0) {
-	printf("Task 1: %f, Task 2: %f, Task 3: %f, Task 4: %f, Task 5: %f, Task: 6 %f, Task 7: %f \n", exec_times[0], exec_times[1], exec_times[2], exec_times[3], exec_times[4], exec_times[5], exec_times[6]);
-      }
-      i = 1;
-      }*/
+    minor_cycle_34567(ces);
+    scheduler_wait_for_timer(ces);
+    
+    minor_cycle_34567(ces);
+    scheduler_wait_for_timer(ces);
+    
+    minor_cycle_34567(ces);
+    scheduler_wait_for_timer(ces);
+    
+    minor_cycle_34567(ces);
+    scheduler_wait_for_timer(ces);
+    
+    minor_cycle_34567(ces);
+    scheduler_wait_for_timer(ces);
+    
+    minor_cycle_8(ces);
+    scheduler_wait_for_timer(ces);
+
     printf("%f \n", timelib_timer_reset(&timer));
   }
   /* --- Local variables (define variables here) --- */
