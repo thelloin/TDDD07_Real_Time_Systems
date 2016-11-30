@@ -52,7 +52,7 @@ void task_communicate(void)
     int bytes_sent = 0;
 
     /* --- Send Data --- */
-   while(g_list_send->count != 0)
+    while(g_list_send->count != 0)
     {
       seq++;
 
@@ -124,8 +124,92 @@ void task_communicate(void)
 
     //printf("WE ARE HERE 1 \n");
 
+/*
+//send all found victims
+while(victim_list->count != 0) {
+printf("WE ARE HERE 2");
+void *data = (void *)malloc(sizeof(victim_t));
+doublylinkedlist_remove(victim_list, victim_list->first, data, &data_type);
+      
+protocol_encode(udp_packet,
+&udp_packet_len,
+s_PROTOCOL_ADDR_BROADCAST,
+g_config.robot_id,
+g_config.robot_team,
+s_PROTOCOL_TYPE_DATA,
+seq,
+g_message_sequence_id,
+last_id,
+data_type,
+data);
+      
+// Broadcast packet
+bytes_sent += udp_packet_len;
+udp_broadcast(g_udps, udp_packet, udp_packet_len);
+      
+free(data);
+}
 
-    while (pheromone_list->count != 0 && bytes_sent < 2400) {
+printf("WE ARE HERE 3");
+
+doublylinkedlist_destroy(victim_list);
+
+//Send the latest robot position
+    
+
+if (robot_list->count != 0) {
+data = (void *)malloc(sizeof(robot_t));
+doublylinkedlist_remove(robot_list, robot_list->first, data, &data_type);
+    
+protocol_encode(udp_packet,
+&udp_packet_len,
+s_PROTOCOL_ADDR_BROADCAST,
+g_config.robot_id,
+g_config.robot_team,
+s_PROTOCOL_TYPE_DATA,
+seq,
+g_message_sequence_id,
+last_id,
+data_type,
+data);
+    
+// Broadcast packet
+bytes_sent += udp_packet_len;
+udp_broadcast(g_udps, udp_packet, udp_packet_len);
+    
+free(data);
+}
+    
+doublylinkedlist_destroy(robot_list);
+    
+printf("WE ARE HERE 4");
+if (pheromone_list->count != 0) {
+data = (void *)malloc(sizeof(pheromone_map_sector_t));
+doublylinkedlist_remove(pheromone_list, pheromone_list->first, data, &data_type);
+    
+protocol_encode(udp_packet,
+&udp_packet_len,
+s_PROTOCOL_ADDR_BROADCAST,
+g_config.robot_id,
+g_config.robot_team,
+s_PROTOCOL_TYPE_DATA,
+seq,
+g_message_sequence_id,
+last_id,
+data_type,
+data);
+    
+// Broadcast packet
+bytes_sent += udp_packet_len;
+udp_broadcast(g_udps, udp_packet, udp_packet_len);
+    
+free(data);
+}
+    
+doublylinkedlist_destroy(pheromone_list);
+*/
+
+    while (pheromone_list->count != 0 && bytes_sent < 1537) {
       data = (void *)malloc(sizeof(pheromone_map_sector_t));
       doublylinkedlist_remove(pheromone_list, pheromone_list->first, data, &data_type);
     
@@ -143,19 +227,15 @@ void task_communicate(void)
     
 // Broadcast packet
       bytes_sent += udp_packet_len;
-
-      if(bytes_sent > 2400) {
-	break;
-      } else {
-	udp_broadcast(g_udps, udp_packet, udp_packet_len);
-      }
+      udp_broadcast(g_udps, udp_packet, udp_packet_len);
+    
       free(data);
     }
 
-    doublylinkedlist_destroy(pheromone_list);
+    
 //    printf("Now here..... \n");
     //  printf("bytes sent: %d \n", bytes_sent);
-    while(stream_list->count != 0 && bytes_sent < 2400) {
+    while(stream_list->count != 0 && bytes_sent < 1537) {
       //printf("WE ARE HERE 2 \n");
       // printf("SENDING BUFFERED STREAM DATA BECAUSE BYTES SENT IS ONLY %d \n", bytes_sent);
       void *data = (void *)malloc(sizeof(stream_t));
@@ -174,23 +254,16 @@ void task_communicate(void)
 		      data);
     
       // Broadcast packet
-      
       bytes_sent += udp_packet_len;
-
-      if(bytes_sent > 2400) {
-	break;
-      } else {
-	udp_broadcast(g_udps, udp_packet, udp_packet_len);
-      }
-     
-      //printf("BYTES SENT IS NOW: %d \n", bytes_sent);
+      udp_broadcast(g_udps, udp_packet, udp_packet_len);
+      printf("BYTES SENT IS NOW: %d \n", bytes_sent);
       free(data);
     
-      
+      doublylinkedlist_destroy(stream_list);
       
     }
 
-    doublylinkedlist_destroy(stream_list);
+
 
     /* --- Receive Data --- */
     // Receive packets, decode and forward to proper process

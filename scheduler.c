@@ -147,6 +147,7 @@ void minor_cycle_1(scheduler_t *ces) {
 void minor_cycle_2(scheduler_t *ces) {
   scheduler_exec_task(ces, 1);
   scheduler_exec_task(ces, 2);
+  scheduler_exec_task(ces, 3);
   scheduler_exec_task(ces, 7);
   scheduler_exec_task(ces, 4);
   scheduler_exec_task(ces, 5);  
@@ -167,35 +168,7 @@ void minor_cycle_8(scheduler_t *ces) {
 
 }
 
-void scheduler_wait_for_timeslot(scheduler_t *ces, int group_number)
-{
 
-  int time_left_this_second;
-  int sleep_time;
-  int group_time_to_wait = (group_number - 1) * 125000; 
-  double integral;
-  double unix_timestamp = timelib_unix_timestamp() / 1000;
-  modf(unix_timestamp, &integral);
-
-  time_left_this_second = (100000 - (int)((unix_timestamp - integral) * 100000)) * 10;
-  
-  if(group_number == 0) {
-    sleep_time = time_left_this_second;
-  }
-  else {
-    sleep_time = time_left_this_second + group_time_to_wait;
-  }
-
-  //printf("sleep_time: %d", sleep_time);
-  // Go to sleep (multipy with 1000 to get miliseconds)
-  usleep(sleep_time);
- 
-  
-/*  else if(time_left_this_second < group_time_to_wait) {
-    sleep_time = group_time_to_wait - time_left_this_second;
-    }*/
-  
-}
 
 
 /**
@@ -203,33 +176,30 @@ void scheduler_wait_for_timeslot(scheduler_t *ces, int group_number)
  * @param ces Pointer to scheduler structure
  * @return Void
  */
-
-
 void scheduler_run(scheduler_t *ces)
 {
 
   
 
-/* here, do your time-consuming job */
+  /* here, do your time-consuming job */
 
 
 
   //timeval timer;
-//  timelib_timer_set(&timer);
+  //  timelib_timer_set(&timer);
 
+ 
+  //struct timeval timer;
+  //int groupNumber = 3;
 
-  struct timeval timer;
-  int groupNumber = 5;
-
-  int i = 1;
-  double exec_times[7];
-  timelib_timer_set(&timer);
+  
+  
+  //timelib_timer_set(&timer);
   ces->minor = 125;
-  scheduler_wait_for_timeslot(ces, groupNumber);
-  printf("Execution starts: %f", timelib_unix_timestamp() / 1000);
+  scheduler_wait_for_timeslot(groupNumber);
+ 
   scheduler_start(ces);
-  //scheduler_exec_task(ces, 2);
-  //scheduler_exec_task(ces, 3);
+
   while(1) {
 
     
@@ -257,10 +227,11 @@ void scheduler_run(scheduler_t *ces)
     minor_cycle_8(ces);
     scheduler_wait_for_timer(ces);
 
-    // printf("%f \n", timelib_timer_reset(&timer));
+
   }
 
-  
+
+
 
 }
 
