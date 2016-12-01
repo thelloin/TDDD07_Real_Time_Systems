@@ -38,11 +38,11 @@ void task_communicate(void)
     int seq = 0; // Massi thing
     //In principle I want to send all the data in the buffer
     int last_id = g_list_send->count; // Massi thing
-    //printf("we are here -1");
-    doublylinkedlist_t *robot_list = doublylinkedlist_init();
-    doublylinkedlist_t *victim_list = doublylinkedlist_init();
+    
+
     doublylinkedlist_t *pheromone_list = doublylinkedlist_init();
     doublylinkedlist_t *stream_list = doublylinkedlist_init();
+    // Pointer to what list to insert in
     doublylinkedlist_t **list_to_insert;
 		
 
@@ -62,12 +62,10 @@ void task_communicate(void)
 	// Robot pose
 	case s_DATA_STRUCT_TYPE_ROBOT :
 	  data = (void *)malloc(sizeof(robot_t));
-	  list_to_insert = &robot_list;
 	  break;
 	  // Victim information
 	case s_DATA_STRUCT_TYPE_VICTIM :
 	  data = (void *)malloc(sizeof(victim_t));
-	  list_to_insert = &victim_list;
 	  break;
 	  // Pheromone map
 	case s_DATA_STRUCT_TYPE_PHEROMONE :
@@ -91,17 +89,16 @@ void task_communicate(void)
 
       // Get data from the list
       doublylinkedlist_remove(g_list_send, g_list_send->first ,data, &data_type);
-      //printf("PHERMONE TYPE: %d \n", s_DATA_STRUCT_TYPE_PHEROMONE);
-      //printf("DATA_TYPE: %d      DATA STRUCT_TYPE: %d \n", data_type, s_DATA_STRUCT_TYPE_STREAM);
+
       //Insert data into respective list **ours**
-      if(data_type == s_DATA_STRUCT_TYPE_STREAM) {
-	
+      if(data_type == s_DATA_STRUCT_TYPE_STREAM) {	
 	doublylinkedlist_insert_beginning(*list_to_insert, data, data_type);
       } else if (data_type == s_DATA_STRUCT_TYPE_PHEROMONE) {
 	doublylinkedlist_insert_beginning(*list_to_insert, data, data_type);
       } else {
-	// Encode data into UDP packet
-	protocol_encode(udp_packet,
+	  // If data wasn't pheromone or stream data, send it directly
+	  // Encode data into UDP packet
+	  protocol_encode(udp_packet,
 			&udp_packet_len,
 			s_PROTOCOL_ADDR_BROADCAST,
 			g_config.robot_id,
@@ -122,9 +119,7 @@ void task_communicate(void)
       free(data);
     }
 
-    //printf("WE ARE HERE 1 \n");
-
-
+    // Send pheromones until no more in list or until bytes_sent > 2400
     while (pheromone_list->count != 0 && bytes_sent < 2400) {
       data = (void *)malloc(sizeof(pheromone_map_sector_t));
       doublylinkedlist_remove(pheromone_list, pheromone_list->first, data, &data_type);
@@ -141,24 +136,25 @@ void task_communicate(void)
 		      data_type,
 		      data);
     
-// Broadcast packet
       bytes_sent += udp_packet_len;
 
       if(bytes_sent > 2400) {
-	break;
+	  // Reached cap of bytes sent
+	  free(data);
+	  break;
       } else {
-	udp_broadcast(g_udps, udp_packet, udp_packet_len);
+	  // Broadcast packet
+	  udp_broadcast(g_udps, udp_packet, udp_packet_len);
       }
       free(data);
     }
 
     doublylinkedlist_destroy(pheromone_list);
-//    printf("Now here..... \n");
-    //  printf("bytes sent: %d \n", bytes_sent);
+
+    // Send stream data until no more in list or until bytes_sent > 2400
     while(stream_list->count != 0 && bytes_sent < 2400) {
-      //printf("WE ARE HERE 2 \n");
-      // printf("SENDING BUFFERED STREAM DATA BECAUSE BYTES SENT IS ONLY %d \n", bytes_sent);
-      void *data = (void *)malloc(sizeof(stream_t));
+
+      data = (void *)malloc(sizeof(stream_t));
       doublylinkedlist_remove(stream_list, stream_list->first, data, &data_type);
     
       protocol_encode(udp_packet,
@@ -172,22 +168,18 @@ void task_communicate(void)
 		      last_id,
 		      data_type,
 		      data);
-    
-      // Broadcast packet
       
       bytes_sent += udp_packet_len;
 
       if(bytes_sent > 2400) {
-	break;
+	  // Reached cap of bytes sent
+	  free(data);
+	  break;
       } else {
-	udp_broadcast(g_udps, udp_packet, udp_packet_len);
+	  // Broadcast packet
+	  udp_broadcast(g_udps, udp_packet, udp_packet_len);
       }
-     
-      //printf("BYTES SENT IS NOW: %d \n", bytes_sent);
       free(data);
-    
-      
-      
     }
 
     doublylinkedlist_destroy(stream_list);
