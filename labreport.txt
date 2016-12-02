@@ -1,0 +1,7 @@
+Introduction - Purpose and Goals
+The main goal for this lab series was to give us the opportunity to get some hand-on experience in building a distributed real-time system. This includes analyze and evaluate timing properties and how to structure a real-time system with regard to deadlines and communication constraints.
+
+
+In lab 1 of this series the goal was the construct a schedule for a set of tasks by measuring and analyzing the WCET and others factors under different conditions.
+
+In lab 2 we were to ensure that the wireless communication between the robots was working given a set of conditions: prioritise the different kinds of messages being sent to ensure that critical messages are delivered, a robot are only allowed to send data under a predifined time-slot, there is a resource constraint on the communication bandwith.
